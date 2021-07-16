@@ -1,0 +1,11 @@
+﻿  Bullet.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\Bullet.cpp(166,54): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Bullet.cpp(173,54): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+  Player.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\Player.cpp(32,39): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Player.cpp(43,39): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+  main.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\main.cpp(24,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\main.cpp(102,76): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  Space Saga.vcxproj -> C:\Users\grant\source\repos\Space Saga\x64\Debug\Space Saga.exe
