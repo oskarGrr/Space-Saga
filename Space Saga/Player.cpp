@@ -1,62 +1,61 @@
 #include "Player.h"
 #include "Bullet.h"
 #include <raylib.h>
+#include <chrono>
 
 // speedConstant will get multipled with the deltatime to get a dynamic velocity (to tell how many units player should move per frame)
 // scale scales the texture size
 float Player::scale = 0.8f;
-double Player::speedMultiplier = 380.0f;
+float Player::speedMultiplier = 420.0f;
 
-Player::Player(const int screenWidth, const int screenHeight)
-    : x_pos(screenWidth * 0.5f), Y_pos(screenHeight * 0.85f),
-      shipTexture(LoadTexture("Resources/Textures/arwing.png")),
-      playerWidth(shipTexture.width * scale),
-      rearNoseRadius(8.0f), rearNoseCircleCenter({x_pos + 55.0f, Y_pos + 30.0f}),
-      frontNoseRadius(4.0f), frontNoseCircleCenter({x_pos + 55.0f, Y_pos + 12.0f}),
-      largeWingRadius(10.0f), largeWingCircleCenterLeft({x_pos + 40.0f, Y_pos + 53.0f}),
-      largeWingCircleCenterRight({x_pos + 71.0f ,Y_pos + 53.0f}) , smallWingRadius(9.0f),
-      smallWingLeftCircleCenter({x_pos + 16.0f, Y_pos + 67.0f}), smallWingRightCircleCenter({x_pos + 95.0f, Y_pos + 67.0f})
-{}
-
-inline float clamp(float value, float min, float max)
+Player::Player(const int SW, const int SH)
+    : pos({ (float)SW * 0.5f , (float)SH * 0.85f }), lives(3)
 {
-    if      (value < min) return min;
-    else if (value > max) return max;
-    else return value;
+    radius1 = 16.0f;
+    circle1 = {pos.x, pos.y};   
+    smallcircle = {pos.x, pos.y - 30.0f};
+    smallradius = 5.0f;
 }
 
-void Player::updatePlayer(const int screenWidth, const int screenHeight, double dynamicPlayerVelocity)
+void Player::initTextureStuff()
 {
-    if (IsKeyDown(KeyboardKey::KEY_RIGHT) || IsKeyDown(KeyboardKey::KEY_D))
-    { 
-        x_pos += dynamicPlayerVelocity;
+    texture = LoadTexture("Resources/Textures/arwing.png");
+    textureOffset = {texture.width * scale / 2, texture.height * scale / 2};
+    circle2 = { pos.x - textureOffset.x * 0.5f, pos.y + 20.0f };
+    circle3 = { pos.x + textureOffset.x * 0.5f, pos.y + 20.0f };
+}
 
-        frontNoseCircleCenter.x = x_pos + 55.0f;
-        rearNoseCircleCenter.x = x_pos + 55.0f;
-        largeWingCircleCenterLeft.x = x_pos + 40.0f;
-        largeWingCircleCenterRight.x = x_pos + 71.0f;
-        smallWingLeftCircleCenter.x = x_pos + 16.0f;
-        smallWingRightCircleCenter.x = x_pos + 95.0f;
+void Player::updatePlayer(const int SW, float dynamicPlayerVelocity, Bullet* bullets)
+{
+    if(IsKeyDown(KeyboardKey::KEY_RIGHT) || IsKeyDown(KeyboardKey::KEY_D))
+    {
+        if(pos.x + textureOffset.x + dynamicPlayerVelocity < SW)
+        {
+            pos.x     += dynamicPlayerVelocity;
+            circle1.x += dynamicPlayerVelocity;
+            circle2.x += dynamicPlayerVelocity;
+            circle3.x += dynamicPlayerVelocity;
+            smallcircle.x += dynamicPlayerVelocity;
+        }
     }
-    if (IsKeyDown(KeyboardKey::KEY_LEFT) || IsKeyDown(KeyboardKey::KEY_A))
-    { 
-        x_pos -= dynamicPlayerVelocity;
-
-        frontNoseCircleCenter.x = x_pos + 55.0f;
-        rearNoseCircleCenter.x = x_pos + 55.0f;
-        largeWingCircleCenterLeft.x = x_pos + 40.0f;
-        largeWingCircleCenterRight.x = x_pos + 71.0f;
-        smallWingLeftCircleCenter.x = x_pos + 16.0f;
-        smallWingRightCircleCenter.x = x_pos + 95.0f;
+    
+    if(IsKeyDown(KeyboardKey::KEY_LEFT) || IsKeyDown(KeyboardKey::KEY_A))
+    {
+        if(pos.x - textureOffset.x - dynamicPlayerVelocity > 0.0f)
+        {
+            pos.x     -= dynamicPlayerVelocity;       
+            circle1.x -= dynamicPlayerVelocity;
+            circle2.x -= dynamicPlayerVelocity;
+            circle3.x -= dynamicPlayerVelocity;
+            smallcircle.x -= dynamicPlayerVelocity;
+        }
     }
+}
 
-    x_pos = clamp(x_pos, 0, (float)screenWidth - playerWidth); // Bounds check       
-    DrawTextureEx(shipTexture, {x_pos, Y_pos}, NULL, scale, WHITE);
-
-    //DrawCircleLines(rearNoseCircleCenter.x, rearNoseCircleCenter.y, rearNoseRadius, BLACK);
-   // DrawCircleLines(frontNoseCircleCenter.x, frontNoseCircleCenter.y, frontNoseRadius, ORANGE);
-    //DrawCircleLines(largeWingCircleCenterLeft.x, largeWingCircleCenterLeft.y, largeWingRadius, ORANGE);
-   // DrawCircleLines(largeWingCircleCenterRight.x, largeWingCircleCenterRight.y, largeWingRadius, ORANGE);
-   // DrawCircleLines(smallWingLeftCircleCenter.x, smallWingLeftCircleCenter.y, smallWingRadius, ORANGE);
-   // DrawCircleLines(smallWingRightCircleCenter.x, smallWingRightCircleCenter.y, smallWingRadius, ORANGE);
+void Player::drawPlayer()
+{
+    Vector2 drawPos;
+    drawPos.x = pos.x - textureOffset.x;
+    drawPos.y = pos.y - textureOffset.y;
+    DrawTextureEx(texture, drawPos, NULL, scale, WHITE);
 }

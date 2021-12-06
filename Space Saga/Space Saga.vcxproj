@@ -102,6 +102,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Space Saga\Library\raylib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,16 +152,14 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Invader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainLoops.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="circleColision.cpp" />
-    <ClCompile Include="gameStateStuff.cpp" />
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="Turret.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
-    <ClInclude Include="Colision.h" />
-    <ClInclude Include="declarationsAndGameloops.h" />
-    <ClInclude Include="gameStateStuff.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="Invader.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Turret.h" />

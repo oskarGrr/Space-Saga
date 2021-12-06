@@ -1,11 +1,38 @@
 ﻿  Bullet.cpp
-C:\Users\grant\source\repos\Space Saga\Space Saga\Bullet.cpp(166,54): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\grant\source\repos\Space Saga\Space Saga\Bullet.cpp(173,54): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-  Player.cpp
-C:\Users\grant\source\repos\Space Saga\Space Saga\Player.cpp(32,39): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-C:\Users\grant\source\repos\Space Saga\Space Saga\Player.cpp(43,39): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+  Invader.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(22,28): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(98,37): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(98,32): warning C4244: 'initializing': conversion from 'int' to 'const float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(99,37): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(99,32): warning C4244: 'initializing': conversion from 'int' to 'const float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(100,37): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(100,32): warning C4244: 'initializing': conversion from 'int' to 'const float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(131,34): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(148,34): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(242,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\Invader.cpp(243,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   main.cpp
-C:\Users\grant\source\repos\Space Saga\Space Saga\main.cpp(24,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\grant\source\repos\Space Saga\Space Saga\main.cpp(102,76): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\main.cpp(9,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  mainLoops.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\mainLoops.cpp(59,26): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\mainLoops.cpp(118,79): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\mainLoops.cpp(118,45): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\mainLoops.cpp(122,66): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\mainLoops.cpp(122,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Player.cpp
+  utils.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(241,81): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(241,53): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(242,77): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(242,51): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(243,79): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(243,52): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(248,69): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(248,45): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(250,52): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(250,38): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\grant\source\repos\Space Saga\Space Saga\utils.cpp(250,24): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Turret.cpp
+C:\Users\grant\source\repos\Space Saga\Space Saga\Turret.cpp(29,31): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   Generating Code...
   Space Saga.vcxproj -> C:\Users\grant\source\repos\Space Saga\x64\Debug\Space Saga.exe

@@ -1,185 +1,291 @@
 #include "Bullet.h"
 #include "Turret.h"
 #include "player.h"
-#include "Colision.h"
+#include "utils.h"
+#include "invader.h"
 #include <chrono>
-
+#include <cmath>
 
 #include <iostream>
 
-
-int Bullet::count;
-int Bullet::max_bullets = 16;
-float Bullet::speedMultiplier = 400.0f;
-float Bullet::Gscale = 0.6f;
-float Bullet::Rscale = 1.5f;
+int   Bullet::count;
+int   Bullet::max_bullets = 16;
+float Bullet::speedMultiplier = 700.0f;
+float Bullet::Tscale = 0.6f;
+float Bullet::Iscale = 1.4f;
 Texture2D Bullet::greenLaser;
 Texture2D Bullet::redLaser;
 Texture2D Bullet::turretLaser;
 
-void Bullet::init_Bullet_Resources()
+void Bullet::init_Bullet_Textures()
 {
     greenLaser = LoadTexture("Resources/Textures/greenLaser.png");
     redLaser = LoadTexture("Resources/Textures/redLaser.png");
     turretLaser = LoadTexture("Resources/Textures/turretLaser.png");
 }
 
-Bullet::Bullet(Vector2 InitialPos, TEAM team)//offset x and y need to be manually changed for now
-    : pos({InitialPos.x, InitialPos.y}), radius(8.0f), 
-      team(team), currentlyDrawnOrNot(OFF_SCREEN)
-{}
-
-void Bullet::InitHitCirlceLocations(Bullet* bullets, const int index)
+Bullet::Bullet(Vector2 InitialPos, TEAM team)
+    : pos(InitialPos),
+      team(team), currentlyDrawnOrNot(currentlyDrawnOrNot::OFF_SCREEN)
 {
-    if(bullets[index].team == INVADER) bullets[index].frontCircleCenter = {bullets[index].pos.x + 24.0f, bullets[index].pos.y + 37.0f};
-    else /*if team == player*/ bullets[index].frontCircleCenter = {bullets[index].pos.x + 55.0f, bullets[index].pos.y + 75.0f};       
+    if(team == TEAM::INVADER)
+    {
+        invaderRadius = 6.0f;
+        textureOffset = {redLaser.width * Iscale / 2, redLaser.height * Iscale / 2};
+    }
+    else if (team == TEAM::PLAYER)
+    {
+        playerRadius = 10.0f;
+        textureOffset = {greenLaser.width * Tscale / 2, greenLaser.height * Tscale / 2};
+    }
+    else if(team == TEAM::TURRET)
+    { 
+        turretRadius = 8.0f;
+    }
+    rotatedOffset = {};    
 }
 
-void Bullet::manageBullets(TEAM team, Vector2 shipPos, Bullet* bullets,
-                           std::chrono::duration<float>& timeElapsedP,
-                           std::chrono::steady_clock::time_point& startP,
-                           std::chrono::steady_clock::time_point& endP,
-                           bool& hasSpaceBeenPressedYet,
-                           std::chrono::steady_clock::time_point& startI,
-                           std::chrono::steady_clock::time_point& endI,
-                           std::chrono::duration<float>& timeElapsedI,
-                           Invader* invaders
-                           )
+void Bullet::manageBullets(Bullet* bullets, Invader* invaders, Player& player, Turret* turrets, float deltaTime)
 {
-    if(team == PLAYER)
-    {
-        if(hasSpaceBeenPressedYet)
-        {
-            endP = std::chrono::steady_clock::now();
-            timeElapsedP = endP - startP;
-            if(timeElapsedP.count() > 0.8f)
-            {//if space has been pressed already and the time inbeween shots is greater than 1 second
-                startP = std::chrono::steady_clock::now();
-                bullets[count] = Bullet(shipPos, team);
-                bullets[count].currentlyDrawnOrNot = ON_SCREEN;
-                InitHitCirlceLocations(bullets, count);
-                count = (count + 1) % max_bullets;
-            }
-            return;
-        }
-        {//only goes here on first space press
-            startP = std::chrono::steady_clock::now();
+    updatePlayerBullets(bullets, player.pos);
+    updateInvaderBullets(invaders, bullets);
+    updateTurretBullets(bullets, turrets, player, deltaTime);
+}
 
-            bullets[count] = Bullet(shipPos, PLAYER);
-            bullets[count].currentlyDrawnOrNot = ON_SCREEN;
-            InitHitCirlceLocations(bullets, count);
+void Bullet::updatePlayerBullets(Bullet* bullets, Vector2 playerPos)
+{
+    using namespace std::chrono;
+
+    steady_clock::time_point end = steady_clock::now();
+    static duration<float> timeElapsed = steady_clock::duration::zero();   
+    static steady_clock::time_point start = steady_clock::now();
+    
+    timeElapsed = end - start;
+
+    if(timeElapsed.count() > 0.65f)
+    { 
+        if(IsMouseButtonPressed(MouseButton::MOUSE_LEFT_BUTTON))
+        {
+            start = steady_clock::now();
+
+            bullets[count] = Bullet(playerPos, TEAM::PLAYER);
+            bullets[count].currentlyDrawnOrNot = currentlyDrawnOrNot::ON_SCREEN;
+
             count = (count + 1) % max_bullets;
-            hasSpaceBeenPressedYet = true;
         }
+        return;
     }
-    else //if team is invader
+}
+
+void Bullet::updateInvaderBullets(Invader* invaders, Bullet* bullets)
+{
+    if(!Invader::validInvaders) return; // return if no invaders alive
+    using namespace std::chrono;
+
+    static steady_clock::time_point start = steady_clock::now();
+    steady_clock::time_point        end = steady_clock::now();
+    static duration<float>          timeElapsed = steady_clock::duration::zero();
+
+    timeElapsed = end - start;
+    if(timeElapsed.count() > Invader::shootSpeed)
     {
-        if(timeElapsedI != std::chrono::steady_clock::duration::zero())
-        {
-            endI = std::chrono::steady_clock::now();
-            timeElapsedI = endI - startI; 
-            if(timeElapsedI.count() > 0.8f)
-            {
-                startI = std::chrono::steady_clock::now();
-                bullets[count] = Bullet(invaders[rand() % Invader::max_invaders].pos, INVADER);
-                bullets[count].currentlyDrawnOrNot = ON_SCREEN;
-                InitHitCirlceLocations(bullets, count);
-                count = (count + 1) % max_bullets;
-            }
+        start = steady_clock::now();
+        int rng = 0;
+
+        for( ; ; )
+        {//loops until rand() picks an invader that is alive          
+            rng = rand() % Invader::max_invaders;
+            if(Invader::validInvaders & 1 << rng) break;
         }
-        else //if first shot from invaders then start timer and make bullet
-        {
-            timeElapsedI = endI - startI;
-            bullets[count] = Bullet(invaders[rand() % Invader::max_invaders].pos, INVADER);
-            bullets[count].currentlyDrawnOrNot = ON_SCREEN;
-            InitHitCirlceLocations(bullets, count);
-            count = (count + 1) % max_bullets;
-            startI = std::chrono::steady_clock::now();
-            timeElapsedI = endI - startI;
-        }
-    }
+        bullets[count] = Bullet(invaders[rng].pos, TEAM::INVADER);
+        bullets[count].currentlyDrawnOrNot = currentlyDrawnOrNot::ON_SCREEN;    
+        count = (count + 1) % max_bullets;
+
+        return;
+    }   
 }
 
-void Bullet::updatePlayerBullets()
+void Bullet::updateTurretBullets(Bullet* bullets, Turret* turrets, Player& player, float deltaTime)
 {
-}
+    if(!Turret::validTurrets) return; // return if no turrets alive
+    using namespace std::chrono;
 
-void Bullet::updateInvaderBullets()
-{
-}
-
-void Bullet::updateTurretBullets()
-{
-}
-
-void Bullet::checkForCollisions(Bullet* bullets, Invader* invaders, Player& player)
-{
-    for(int i = 0; i < max_bullets; ++i)
+    static steady_clock::time_point start = steady_clock::now();
+    static duration<float> timeElapsed = steady_clock::duration::zero();
+    steady_clock::time_point end = steady_clock::now();
+    
+    timeElapsed = end - start;
+    
+    if(timeElapsed.count() > 3.8f)
     {
-        if(bullets[i].currentlyDrawnOrNot == ON_SCREEN) 
-        {
-            if(bullets[i].team == PLAYER)
-            {
-                for(int j = 0; j < Invader::max_invaders; ++j)
-                {
-                    if(isColliding(bullets[i].frontCircleCenter, invaders[j].center_wingLargeLeft, bullets[i].radius, invaders[j].wingRadiusLarge)
-                        ||
-                       isColliding(bullets[i].frontCircleCenter, invaders[j].center_wingLargeRight, bullets[i].radius, invaders[j].wingRadiusLarge)
-                        ||
-                       isColliding(bullets[i].frontCircleCenter, invaders[j].noseTipCircleCenter, bullets[i].radius, invaders[j].noseTipRadius))
-                    {
-                        std::cout << "COLLISION" << "\n";
-                        bullets[i].currentlyDrawnOrNot = OFF_SCREEN;
-                    }
-                }
-            }//if team == player
-            else if(isColliding(bullets[i].frontCircleCenter, player.frontNoseCircleCenter, bullets[i].radius, player.frontNoseRadius)
-                     ||
-                    isColliding(bullets[i].frontCircleCenter, player.rearNoseCircleCenter, bullets[i].radius, player.rearNoseRadius)
-                     ||
-                    isColliding(bullets[i].frontCircleCenter, player.largeWingCircleCenterLeft, bullets[i].radius, player.largeWingRadius)
-                     ||
-                    isColliding(bullets[i].frontCircleCenter, player.largeWingCircleCenterRight, bullets[i].radius, player.largeWingRadius)
-                     ||
-                    isColliding(bullets[i].frontCircleCenter, player.smallWingLeftCircleCenter, bullets[i].radius, player.smallWingRadius)
-                     ||
-                    isColliding(bullets[i].frontCircleCenter, player.smallWingRightCircleCenter, bullets[i].radius, player.smallWingRadius))
-            {
-                std::cout << "COLLISION" << "\n";
-                bullets[i].currentlyDrawnOrNot = OFF_SCREEN;
-            }
+        Bullet& b = bullets[count];
+        int rngTurret = 0;
+
+        //pick rng turret to shoot from
+        for( ; ; )
+        {//breaks when it picks on that is alive
+            rngTurret = rand() % Turret::turretCount;
+            if(Turret::validTurrets & 1 << rngTurret) break;
         }
-    }
+
+        const float spawnOffset = 75.0f;
+
+        Vector2 spawnPos = {turrets[rngTurret].pos.x, turrets[rngTurret].pos.y + spawnOffset};
+        spawnPos = Utils::rotateAroundSpecificPoint(spawnPos, turrets[rngTurret].pos, turrets[rngTurret].amountRotated);
+
+        //initialize new bullet at rng turret location
+        b = Bullet(spawnPos, TEAM::TURRET);
+        
+        b.currentlyDrawnOrNot = currentlyDrawnOrNot::ON_SCREEN;
+
+        {//after they are in the right place we can rotate the bullet to point to the player
+            Vector2 laserTextureOffset = {-(turretLaser.width * .5f * Tscale),-(turretLaser.height * .5f * Tscale)};
+            b.rotatedOffset = Utils::rotateVector(laserTextureOffset, turrets[rngTurret].amountRotated);  
+
+            b.rotatedOffset.x += b.pos.x;
+            b.rotatedOffset.y += b.pos.y;
+
+            b.angleDegrees = turrets[rngTurret].amountRotated * RAD2DEG;
+        }
+
+        {//gets vector to player and sets the right length
+            b.velocityVector = {player.pos.x - b.pos.x, 
+                                player.pos.y - b.pos.y};
+            b.velocityVector = Utils::normalizeVector2(b.velocityVector);
+            b.velocityVector.x *= speedMultiplier * deltaTime;
+            b.velocityVector.y *= speedMultiplier * deltaTime;
+        }
+        
+        count = (count + 1) % max_bullets;
+        start = steady_clock::now();   
+    }  
 }
 
-void Bullet::drawBullets(Bullet* bullets, double dynamicBulletVelocity, int screenHeight, float playerWidth)
+void Bullet::checkForCollisions(Bullet* bullets, Invader* invaders, Player& P, Turret* turrets)
 {
     for(int i = 0; i < max_bullets; i++)
     {
-        if( (bullets[i].pos.y >= screenHeight) || (bullets[i].pos.y <= -55) ) 
+        Bullet& B = bullets[i];
+        //if(B.currentlyDrawnOrNot == currentlyDrawnOrNot::OFF_SCREEN) continue;
+        if(B.team == TEAM::PLAYER) 
         {
-            bullets[i].currentlyDrawnOrNot = OFF_SCREEN;
-            continue;
+            checkForInvaderCollisions(bullets + i, invaders);
+            checkForTurretCollisions(bullets + i, turrets);
+            //checkForBulletCollisions(i, bullets);
         }
-        if(bullets[i].team == INVADER)
+        else //if team == invader or turret bullet
         {
-            bullets[i].pos.y += dynamicBulletVelocity;
-            bullets[i].frontCircleCenter.y = bullets[i].pos.y + 80.0f;
-            DrawTextureEx(redLaser, allignLaserWithInvader(bullets, i), NULL, Rscale, WHITE);
-            //DrawCircleLines(bullets[i].frontCircleCenter.x, bullets[i].frontCircleCenter.y, bullets[i].radius, BLUE);
-        }
-        else
-        {
-            bullets[i].pos.y -= dynamicBulletVelocity;
-            bullets[i].frontCircleCenter.y = bullets[i].pos.y;
-            DrawTextureEx(greenLaser, allignLaserWithPlayer(playerWidth, bullets, i), NULL, Bullet::Gscale, WHITE);
-            //DrawCircleLines(bullets[i].frontCircleCenter.x, bullets[i].frontCircleCenter.y, bullets[i].radius, RED);
+            checkForPlayerCollision(P, bullets + i, bullets[i].invaderRadius);
         }
     }
 }
 
-inline Vector2 Bullet::allignLaserWithPlayer(float playerWidth, Bullet* bullets, int index)
-{return {bullets[index].pos.x + playerWidth * 0.5f - greenLaser.width * Gscale * 0.5f, bullets[index].pos.y - 22};}
+#if 0
+void Bullet::checkForBulletCollisions(const int playerBullet, Bullet* bullets)
+{
+    Bullet& PB = bullets[playerBullet];
+    for(int i=0; i<max_bullets;i++)
+    {
+        Bullet& B = bullets[i];
+        if(i == playerBullet)continue;
+        if(isColliding(B.pos, PB.pos, B.invaderRadius, PB.playerRadius) &&
+           B.currentlyDrawnOrNot == currentlyDrawnOrNot::ON_SCREEN &&
+           PB.currentlyDrawnOrNot == currentlyDrawnOrNot::ON_SCREEN)
+        {
+            B.currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+            PB.currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+        }
+    }
+}
+#endif
 
-inline Vector2 Bullet::allignLaserWithInvader(Bullet* bullets, const int index)
-{return {bullets[index].pos.x + 4.0f, bullets[index].pos.y + 50.0f};}
+void Bullet::checkForPlayerCollision(Player& P, Bullet* B, const float radius)
+{
+    Vector2 bc = B->pos;
+    
+    if(B->currentlyDrawnOrNot == currentlyDrawnOrNot::OFF_SCREEN)return;
+
+    if(Utils::isColliding(bc, P.circle1, radius, P.radius1)||
+       Utils::isColliding(bc, P.circle2, radius, P.radius1)||
+       Utils::isColliding(bc, P.circle3, radius, P.radius1)||
+       Utils::isColliding(bc, P.smallcircle, radius, P.smallradius))
+    {
+        B->currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+        Utils::PcollisionResolution(P);
+    }
+}
+
+void Bullet::checkForTurretCollisions(Bullet* B, Turret* turrets)
+{
+    for(int i=0; i<Turret::turretCount; i++)
+    {
+        Turret& T = turrets[i];
+
+        if(B->currentlyDrawnOrNot == currentlyDrawnOrNot::OFF_SCREEN)continue;
+
+        if(Utils::isColliding(B->pos, T.hitCircle, B->playerRadius, T.radius))
+        {
+            B->currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+            Utils::TcollisionResolution(i, turrets[i]);
+        }
+    }
+}
+
+void Bullet::checkForInvaderCollisions(Bullet* B, Invader* invaders)
+{
+    for(int i=0; i<Invader::max_invaders; i++)
+    {
+        Invader& I = invaders[i];
+
+        if(B->currentlyDrawnOrNot == currentlyDrawnOrNot::OFF_SCREEN || !(Invader::validInvaders & 1<<i))continue;
+
+        if(Utils::isColliding(B->pos, I.centerCircle, B->playerRadius, I.centerRadius)||
+           Utils::isColliding(B->pos, I.leftCircle, B->playerRadius, I.leftRightRadius)||
+           Utils::isColliding(B->pos, I.rightCircle, B->playerRadius, I.leftRightRadius))
+        {
+            B->currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+            Utils::IcollisionResolution(invaders[i], i);          
+        }
+    }
+}
+
+void Bullet::drawBullets(Bullet* bullets, float dynamicBulletVelocity, int screenHeight, Player& player)
+{
+    for(int i = 0; i < max_bullets; i++)
+    {
+        Bullet& B = bullets[i];
+
+        if( (B.pos.y >= screenHeight) || (B.pos.y <= -55) ) 
+        {
+            bullets[i].currentlyDrawnOrNot = currentlyDrawnOrNot::OFF_SCREEN;
+            continue;
+        }
+        if(B.team == TEAM::INVADER && B.currentlyDrawnOrNot == currentlyDrawnOrNot::ON_SCREEN)
+        {
+            bullets[i].pos.y += dynamicBulletVelocity;
+            Vector2 drawPos = {B.pos.x - B.textureOffset.x, 
+                               B.pos.y - B.textureOffset.y};
+            DrawTextureEx(redLaser, drawPos, NULL, Iscale, WHITE);
+            //DrawCircleLines(B.pos.x, B.pos.y, B.invaderRadius, BLUE);
+        }
+        else if(B.team == TEAM::PLAYER && B.currentlyDrawnOrNot == currentlyDrawnOrNot::ON_SCREEN)
+        {
+            B.pos.y -= dynamicBulletVelocity;
+            Vector2 drawPos = {B.pos.x - B.textureOffset.x, 
+                               B.pos.y - B.textureOffset.y};
+            DrawTextureEx(greenLaser, drawPos, NULL, Tscale, WHITE);
+            //DrawCircleLines(B.pos.x, B.pos.y, 6, ORANGE);
+        }
+        else if (B.team == TEAM::TURRET && B.currentlyDrawnOrNot == currentlyDrawnOrNot::ON_SCREEN)
+        {
+            B.pos.x += B.velocityVector.x;
+            B.pos.y += B.velocityVector.y;
+
+            B.rotatedOffset.x += B.velocityVector.x;
+            B.rotatedOffset.y += B.velocityVector.y;
+
+            DrawTextureEx(turretLaser, B.rotatedOffset, B.angleDegrees, Tscale, WHITE);
+            //DrawCircleLines(B.pos.x, B.pos.y, B.turretRadius, BLUE);
+        }
+    }
+}

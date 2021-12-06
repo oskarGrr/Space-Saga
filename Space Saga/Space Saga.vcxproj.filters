@@ -27,13 +27,13 @@
     <ClCompile Include="Invader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="circleColision.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Turret.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gameStateStuff.cpp">
+    <ClCompile Include="mainLoops.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,16 +47,10 @@
     <ClInclude Include="Invader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Colision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="declarationsAndGameloops.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Turret.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gameStateStuff.h">
+    <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

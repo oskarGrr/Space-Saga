@@ -1,31 +1,32 @@
 #pragma once
 #include <raylib.h>
 
+class Bullet;
+
 class Player
 {
 public:
 
-    float x_pos;
-    float Y_pos;
-    Texture2D shipTexture;
-    float playerWidth;
+    Vector2 pos;
+    Texture2D texture;
+    Vector2 textureOffset;
+    int lives;
+
     //////////////////////////////////
-    float   rearNoseRadius;
-    Vector2 rearNoseCircleCenter;
-    float   frontNoseRadius;
-    Vector2 frontNoseCircleCenter;
-    float   largeWingRadius;
-    Vector2 largeWingCircleCenterLeft;
-    Vector2 largeWingCircleCenterRight;
-    float   smallWingRadius;
-    Vector2 smallWingLeftCircleCenter;
-    Vector2 smallWingRightCircleCenter;
+    Vector2 circle1;   
+    Vector2 circle2;   
+    Vector2 circle3;
+    Vector2 smallcircle;
+    float radius1;
+    float smallradius;       
     //////////////////////////////////
 
-    static double speedMultiplier;
+    static float speedMultiplier;
     static float scale;
 
     Player(const int screenWidth, const int screenHeight);
     //updatePlayer every game loop to update players position and whatnot
-    void updatePlayer(const int screenWidth, const int screenHeight, double dynamicPlayerVelocity);
+    void initTextureStuff();
+    void updatePlayer(const int screenWidth, float dynamicPlayerVelocity, Bullet*);
+    void drawPlayer();
 };
